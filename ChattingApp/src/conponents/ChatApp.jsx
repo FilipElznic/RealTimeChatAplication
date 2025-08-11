@@ -1,126 +1,144 @@
-import { initializeApp } from "firebase/app";
-import { addDoc, getFirestore, serverTimestamp } from "firebase/firestore";
+import { useState, useEffect } from "react";
 import {
-  getAuth,
-  GoogleAuthProvider,
-  signInWithPopup,
-  signOut,
-} from "firebase/auth";
-import { useAuthState } from "react-firebase-hooks/auth";
-import { useCollectionData } from "react-firebase-hooks/firestore";
-import { collection, query, orderBy, limit } from "firebase/firestore";
-import { useRef, useState } from "react";
-
-import "../App.css";
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyDqets2wa5qliHWXxKe0Vo2lCclkq3n7-U",
-  authDomain: "chattingapp-filip.firebaseapp.com",
-  projectId: "chattingapp-filip",
-  storageBucket: "chattingapp-filip.appspot.com",
-  messagingSenderId: "334026627618",
-  appId: "1:334026627618:web:e8fb1790b33b808c31887b",
-  measurementId: "G-51P0TGJWCZ",
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const firestore = getFirestore(app);
+  collection,
+  addDoc,
+  onSnapshot,
+  query,
+  orderBy,
+  serverTimestamp,
+} from "firebase/firestore";
+import { auth, db } from "../firebase-config";
+import { signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
 
 function ChatApp() {
-  const [user] = useAuthState(auth);
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [user, setUser] = useState(null);
 
-  return (
-    <div className="App">
-      <header className="App-header"></header>
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
 
-      <section>{user ? <ChatRoom /> : <SignIn />}</section>
-    </div>
-  );
-}
+  useEffect(() => {
+    if (user) {
+      const q = query(collection(db, "messages"), orderBy("createdAt"));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const messagesData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setMessages(messagesData);
+      });
+      return () => unsubscribe();
+    }
+  }, [user]);
 
-function SignIn() {
-  const signInWithGoogle = () => {
+  const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider);
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (error) {
+      console.error("Error signing in with Google:", error);
+    }
   };
-  return <button onClick={signInWithGoogle}>Sign in with Google</button>;
-}
 
-function SignOut() {
-  return (
-    auth.currentUser && <button onClick={() => signOut(auth)}>Sign Out</button>
-  );
-}
-
-function ChatRoom() {
-  const dummy = useRef();
-
-  const messagesRef = collection(firestore, "messages");
-  const messagesQuery = query(messagesRef, orderBy("createdAt"), limit(25));
-
-  const [messages] = useCollectionData(messagesQuery, { idField: "id" });
-
-  const [formValue, setFormValue] = useState("");
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
 
   const sendMessage = async (e) => {
     e.preventDefault();
-
-    const { uid, photoURL } = auth.currentUser;
-
-    if (!uid) {
-      console.error("User is not authenticated");
-      return;
-    }
-
+    if (newMessage.trim() === "" || !user) return;
     try {
-      await addDoc(messagesRef, {
-        text: formValue,
+      await addDoc(collection(db, "messages"), {
+        text: newMessage,
         createdAt: serverTimestamp(),
-        uid,
-        photoURL,
+        user: user.displayName,
+        photoURL: user.photoURL,
+        uid: user.uid,
       });
-      setFormValue("");
-      dummy.current.scrollIntoView({ behavior: "smooth" });
+      setNewMessage("");
     } catch (error) {
-      console.error("Error adding document: ", error);
+      console.error("Error sending message:", error);
     }
   };
 
-  return (
-    <>
-      <div>
-        {messages &&
-          messages.map((msg) => <ChatMessage key={msg.id} message={msg} />)}
-
-        <div ref={dummy}></div>
+  if (!user) {
+    return (
+      <div className="app">
+        <div className="chat-app">
+          <div className="chat-container">
+            <div className="chat-header">
+              <h1 className="chat-title">CYBER CHAT</h1>
+              <p className="chat-subtitle">
+                {"/// SECURE NEURAL LINK REQUIRED ///"}
+              </p>
+            </div>
+            <div className="auth-container">
+              <button onClick={signInWithGoogle} className="google-signin">
+                INITIALIZE NEURAL LINK
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
-
-      <form onSubmit={sendMessage}>
-        <input
-          value={formValue}
-          onChange={(e) => setFormValue(e.target.value)}
-        />
-        <button type="submit">Send</button>
-      </form>
-
-      <div>
-        <SignOut />
-      </div>
-    </>
-  );
-}
-
-function ChatMessage(props) {
-  const { text, uid, photoURL } = props.message;
-
-  const messageClass = uid === auth.currentUser.uid ? "sent" : "received";
+    );
+  }
 
   return (
-    <div className={`message ${messageClass}`}>
-      <img src={photoURL} alt="profile" />
-      <p>{text}</p>
+    <div className="app">
+      <div className="chat-app">
+        <div className="chat-container">
+          <div className="chat-header">
+            <h1 className="chat-title">CYBER CHAT</h1>
+            <p className="chat-subtitle">{"/// NEURAL LINK ESTABLISHED ///"}</p>
+            <button onClick={handleSignOut} className="signout-button">
+              DISCONNECT
+            </button>
+          </div>
+
+          <div className="messages-container">
+            {messages.map((message) => (
+              <div key={message.id} className="message">
+                <div className="message-header">
+                  {message.photoURL && (
+                    <img
+                      src={message.photoURL}
+                      alt="User"
+                      className="user-avatar"
+                    />
+                  )}
+                  <span className="user-name">{message.user}</span>
+                  <span className="timestamp">
+                    {message.createdAt?.toDate().toLocaleTimeString()}
+                  </span>
+                </div>
+                <div className="message-text">{message.text}</div>
+              </div>
+            ))}
+          </div>
+
+          <form onSubmit={sendMessage} className="input-container">
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Transmit neural data..."
+              className="message-input"
+            />
+            <button type="submit" className="send-button">
+              TRANSMIT
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }

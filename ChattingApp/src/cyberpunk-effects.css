@@ -1,0 +1,264 @@
+/* Cyberpunk Additional Effects */
+
+/* Matrix-style falling characters animation */
+@keyframes matrix {
+  0% {
+    transform: translateY(-100vh);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+/* Floating particles in background */
+.matrix-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -2;
+  overflow: hidden;
+}
+
+.matrix-char {
+  position: absolute;
+  color: #00ff41;
+  font-family: "Share Tech Mono", monospace;
+  font-size: 14px;
+  animation: matrix 10s linear infinite;
+  opacity: 0.3;
+}
+
+/* Holographic effect for messages */
+.message::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(0, 255, 65, 0.1) 50%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.message:hover::after {
+  opacity: 1;
+}
+
+/* Terminal-style typing effect */
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes blink-caret {
+  from,
+  to {
+    border-color: transparent;
+  }
+  50% {
+    border-color: #00ff41;
+  }
+}
+
+.typing-effect {
+  overflow: hidden;
+  border-right: 2px solid #00ff41;
+  white-space: nowrap;
+  margin: 0 auto;
+  letter-spacing: 0.1em;
+  animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+}
+
+/* Glitch effect */
+@keyframes glitch {
+  0% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-2px, 2px);
+  }
+  40% {
+    transform: translate(-2px, -2px);
+  }
+  60% {
+    transform: translate(2px, 2px);
+  }
+  80% {
+    transform: translate(2px, -2px);
+  }
+  100% {
+    transform: translate(0);
+  }
+}
+
+.glitch:hover {
+  animation: glitch 0.3s ease-in-out;
+}
+
+/* Circuit board pattern */
+.circuit-pattern {
+  background-image: radial-gradient(
+      circle at 20% 50%,
+      transparent 20%,
+      rgba(0, 255, 65, 0.1) 21%,
+      rgba(0, 255, 65, 0.1) 34%,
+      transparent 35%,
+      transparent
+    ),
+    linear-gradient(
+      0deg,
+      transparent 24%,
+      rgba(0, 255, 65, 0.05) 25%,
+      rgba(0, 255, 65, 0.05) 26%,
+      transparent 27%,
+      transparent 74%,
+      rgba(0, 255, 65, 0.05) 75%,
+      rgba(0, 255, 65, 0.05) 76%,
+      transparent 77%,
+      transparent
+    ),
+    linear-gradient(
+      90deg,
+      transparent 24%,
+      rgba(0, 255, 65, 0.05) 25%,
+      rgba(0, 255, 65, 0.05) 26%,
+      transparent 27%,
+      transparent 74%,
+      rgba(0, 255, 65, 0.05) 75%,
+      rgba(0, 255, 65, 0.05) 76%,
+      transparent 77%,
+      transparent
+    );
+  background-size: 50px 50px;
+}
+
+/* Data stream animation */
+@keyframes dataStream {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100vw);
+  }
+}
+
+.data-stream {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 100vh;
+  background: linear-gradient(to bottom, transparent, #00ff41, transparent);
+  animation: dataStream 8s linear infinite;
+  z-index: -1;
+}
+
+/* Multiple data streams */
+.data-stream:nth-child(1) {
+  animation-delay: 0s;
+  top: 10%;
+}
+.data-stream:nth-child(2) {
+  animation-delay: 2s;
+  top: 30%;
+}
+.data-stream:nth-child(3) {
+  animation-delay: 4s;
+  top: 50%;
+}
+.data-stream:nth-child(4) {
+  animation-delay: 6s;
+  top: 70%;
+}
+
+/* Console-style text selection */
+::selection {
+  background: rgba(0, 255, 65, 0.3);
+  color: #00ff41;
+}
+
+::-moz-selection {
+  background: rgba(0, 255, 65, 0.3);
+  color: #00ff41;
+}
+
+/* Retro CRT monitor effect */
+.crt-effect {
+  position: relative;
+}
+
+.crt-effect::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 255, 65, 0.03) 2px,
+    rgba(0, 255, 65, 0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Status indicator */
+.status-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: #00ff41;
+  border-radius: 50%;
+  margin-right: 8px;
+  box-shadow: 0 0 10px #00ff41;
+  animation: pulse 1.5s ease-in-out infinite alternate;
+}
+
+.status-indicator.offline {
+  background: #ff0041;
+  box-shadow: 0 0 10px #ff0041;
+}
+
+/* Futuristic progress bar */
+.progress-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid #00ff41;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00ff41, #00cc33, #00ff41);
+  background-size: 200% 100%;
+  animation: progressShine 2s linear infinite;
+}
+
+@keyframes progressShine {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
